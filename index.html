@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Angelica’s Diary 💌</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(to bottom right, #fce1ec, #ffd6f6);
+      margin: 0;
+      padding: 0;
+      color: #444;
+      text-align: center;
+      overflow-x: hidden;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    header {
+      background-color: #ff8fb1;
+      color: white;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 1.6em;
+      font-weight: bold;
+      letter-spacing: 1px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      background-color: #ffc1dc;
+      padding: 10px 0;
+    }
+
+    nav button {
+      background: #ff8fb1;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    nav button:hover {
+      background-color: #ff70a6;
+      transform: scale(1.05);
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    section {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    section.active {
+      display: block;
+      opacity: 1;
+    }
+
+    h2 {
+      color: #ff6fa9;
+      border-bottom: 2px solid #ffd1e8;
+      padding-bottom: 8px;
+    }
+
+    p {
+      font-size: 1.1em;
+      line-height: 1.6;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    
+    /* --- GALLERY LAYOUT: 3 COLUMNS, FIXED HEIGHT --- */
+    .media-gallery {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 15px;
+    }
+
+    .media-container {
+        /* Default: 3-column layout */
+        width: 33.33%;
+        /* Set FIXED HEIGHT for uniform vertical size */
+        height: 200px; 
+        overflow: hidden; 
+        
+        box-sizing: border-box;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 10px;
+        cursor: pointer; 
+        transition: transform 0.3s ease;
+        text-align: center;
+    }
+
+    .media-container:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* Media Query for Tablets/Smaller: 2 columns */
+    @media (max-width: 768px) {
+        .media-container {
+            width: 50%;
+            height: 180px; 
+        }
+    }
+
+    /* Media Query for Phones/Smallest Screens: 2 columns */
+    @media (max-width: 480px) {
+        .media-container {
+            width: 50%; 
+            height: 250px; 
+        }
+    }
+    
+    /* STYLES FOR THUMBNAIL MEDIA (Video and Image) */
+    video, img {
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; /* Ensures media covers the thumbnail container */
+      border-radius: 12px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    }
+    
+    .media-description {
+        font-size: 0.9em; 
+        line-height: 1.4;
+        margin-top: 5px;
+        color: #777;
+        display: none; 
+    }
+    
+    /* --- MODAL STYLES --- */
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; 
+        z-index: 2000; 
+        padding-top: 20px; 
+        left: 0;
+        top: 0;
+        width: 100%; 
+        height: 100%; 
+        overflow: auto; 
+        background-color: rgba(0,0,0,0.9); 
+        /* Used when display: flex is applied by JS */
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 90%;
+        max-width: 90%; 
+        max-height: 95vh; 
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        animation-name: zoom;
+        animation-duration: 0.6s;
+    }
+    
+    /* STYLES FOR EXPANDED MEDIA (Video and Image) */
+    #expandedMedia {
+        text-align: center;
+        max-width: 100%;
+        max-height: 85vh; 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #expandedMedia video, #expandedMedia img {
+        /* Constrained by both width and height for modal viewing */
+        max-width: 90vw; 
+        max-height: 75vh; 
+        width: auto;
+        height: auto; 
+        object-fit: contain;
+        /* Remove shadows/borders for cleaner modal display */
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    @keyframes zoom {
+        from {transform:scale(0)}
+        to {transform:scale(1)}
+    }
+
+    .close {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: #ff70a6;
+        text-decoration: none;
+    }
+    
+    #caption {
+        margin-top: 15px;
+        display: block;
+        text-align: center;
+        color: #444;
+        font-size: 1.2em;
+        line-height: 1.5;
+        font-weight: 600;
+    }
+
+    /* --- DARK MODE STYLES --- */
+    
+    body.dark {
+      background: #1a1a1a;
+      color: #eee;
+    }
+
+    body.dark .container {
+      background: #2b2b2b;
+    }
+
+    body.dark .modal-content {
+        background: #2b2b2b;
+    }
+    
+    body.dark #caption {
+        color: #eee;
+    }
+
+    body.dark header, body.dark footer {
+      background-color: #ff70a6;
+    }
+    
+    body.dark textarea {
+        background-color: #3b3b3b;
+        color: #eee;
+        border-color: #555;
+    }
+
+    body.dark .entry {
+        background: #3b3b3b;
+        color: #eee;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    /* --- OTHER STYLES --- */
+    
+    footer {
+      text-align: center;
+      padding: 15px;
+      background-color: #ff8fb1;
+      color: white;
+      border-radius: 0 0 15px 15px;
+      font-size: 0.9em;
+    }
+
+    #musicBtn, #darkModeBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #ff8fb1;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 1.2em;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+      z-index: 999;
+    }
+
+    #musicBtn:hover, #darkModeBtn:hover {
+      background-color: #ff70a6;
+      transform: scale(1.1);
+    }
+
+    #darkModeBtn {
+      right: 100px;
+    }
+
+    /* Floating hearts */
+    .heart {
+      position: fixed;
+      bottom: -10px;
+      color: #ff8fb1;
+      font-size: 20px;
+      animation: float 5s linear infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) rotate(0); opacity: 0.8; }
+      100% { transform: translateY(-800px) rotate(360deg); opacity: 0; }
+    }
+
+    /* Diary entry form */
+    textarea {
+      width: 90%;
+      height: 80px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      resize: none;
+      font-family: "Poppins";
+      color: #444; 
+    }
+    
+    button.saveEntry {
+      background-color: #ff8fb1;
+      color: white;
+      border: none;
+      border-radius: 15px;
+      padding: 8px 15px;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button.saveEntry:hover {
+      background-color: #ff70a6;
+    }
+
+    .entries {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .entry {
+      background: #fff5fa;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      color: #444;
+    }
+    
+  </style>
+</head>
+<body>
+
+  <audio id="musicSmiles" loop><source src="smile_music.mp3" type="audio/mpeg" /></audio>
+  <audio id="musicWithBodmun" loop><source src="withyou_music.mp3" type="audio/mpeg" /></audio>
+  <audio id="musicRandom" loop><source src="random_music.mp3" type="audio/mpeg" /></audio>
+
+  <header>💖 Angelica’s Diary 💖</header>
+
+  <nav>
+    <button onclick="showSection('smiles')">Smiles 😊</button>
+    <button onclick="showSection('withbodmun')">With Ysagani 💕</button>
+    <button onclick="showSection('random')">Random ✍️</button>
+  </nav>
+
+  <div class="container">
+    
+ <section id="smiles" class="active">
+    <h2>Smiles 😊</h2>
+    <p>Click on any clip for a closer look and description!</p>
+
+    <div class="media-gallery">
+        <div class="media-container" data-description="Smile 1: Just a spontaneous happy moment." data-media-type="video">
+            <video controls><source src="smile1.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 1: Just a spontaneous happy moment.</p>
+        </div>
+        <div class="media-container" data-description="Smile 2: That time I laughed so hard I cried." data-media-type="video">
+            <video controls><source src="smile2.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 2: That time I laughed so hard I cried.</p>
+        </div>
+        <div class="media-container" data-description="Smile 3: Quick selfie right after waking up." data-media-type="video">
+            <video controls><source src="smile3.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 3: Quick selfie right after waking up.</p>
+        </div>
+        <div class="media-container" data-description="Smile 4: Trying out a silly filter." data-media-type="video">
+            <video controls><source src="smile4.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 4: Trying out a silly filter.</p>
+        </div>
+        <div class="media-container" data-description="Smile 5: A successful new recipe attempt!" data-media-type="video">
+            <video controls><source src="smile5.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 5: A successful new recipe attempt!</p>
+        </div>
+        <div class="media-container" data-description="Smile 6: Dancing alone in my room." data-media-type="video">
+            <video controls><source src="smile6.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 6: Dancing alone in my room.</p>
+        </div>
+        <div class="media-container" data-description="Smile 7: Showing off my new outfit." data-media-type="video">
+            <video controls><source src="smile7.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 7: Showing off my new outfit.</p>
+        </div>
+        <div class="media-container" data-description="Smile 8: Just chilling with a book." data-media-type="video">
+            <video controls><source src="smile8.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 8: Just chilling with a book.</p>
+        </div>
+        <div class="media-container" data-description="Smile 9: Morning coffee routine." data-media-type="video">
+            <video controls><source src="smile9.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 9: Morning coffee routine.</p>
+        </div>
+        <div class="media-container" data-description="Smile 10: Singing badly but proudly." data-media-type="video">
+            <video controls><source src="smile10.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 10: Singing badly but proudly.</p>
+        </div>
+        <div class="media-container" data-description="Smile 1: Just a spontaneous happy moment." data-media-type="video">
+            <video controls><source src="smile11.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 1: Just a spontaneous happy moment.</p>
+        </div>
+        <div class="media-container" data-description="Smile 2: That time I laughed so hard I cried." data-media-type="video">
+            <video controls><source src="smile12.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 2: That time I laughed so hard I cried.</p>
+        </div>
+        <div class="media-container" data-description="Smile 3: Quick selfie right after waking up." data-media-type="video">
+            <video controls><source src="smile13.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 3: Quick selfie right after waking up.</p>
+        </div>
+        <div class="media-container" data-description="Smile 4: Trying out a silly filter." data-media-type="video">
+            <video controls><source src="smile14.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 4: Trying out a silly filter.</p>
+        </div>
+        <div class="media-container" data-description="Smile 5: A successful new recipe attempt!" data-media-type="video">
+            <video controls><source src="smile15.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 5: A successful new recipe attempt!</p>
+        </div>
+        <div class="media-container" data-description="Smile 6: Dancing alone in my room." data-media-type="video">
+            <video controls><source src="smile16.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 6: Dancing alone in my room.</p>
+        </div>
+        <div class="media-container" data-description="Smile 7: Showing off my new outfit." data-media-type="video">
+            <video controls><source src="smile17.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 7: Showing off my new outfit.</p>
+        </div>
+        <div class="media-container" data-description="Smile 8: Just chilling with a book." data-media-type="video">
+            <video controls><source src="smile18.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 8: Just chilling with a book.</p>
+        </div>
+        <div class="media-container" data-description="Smile 9: Morning coffee routine." data-media-type="video">
+            <video controls><source src="smile19.mp4" type="video/mp4" /></video>
+            <p class="media-description">Smile 9: Morning coffee routine.</p>
+        </div>
+
+        <div class="media-container" data-description="Smile 10: Singing badly but proudly." data-media-type="image">
+            <img src="smile20.jpg" alt="Photo of singing badly" />
+            <p class="media-description">Smile 10: Singing badly but proudly.</p>
+        </div>
+        <div class="media-container" data-description="Smile 1: Just a spontaneous happy moment." data-media-type="image">
+            <img src="smile21.jpg" alt="Photo of happy moment" />
+            <p class="media-description">Smile 1: Just a spontaneous happy moment.</p>
+        </div>
+        <div class="media-container" data-description="Smile 2: That time I laughed so hard I cried." data-media-type="image">
+            <img src="smile22.jpg" alt="Photo of laughing hard" />
+            <p class="media-description">Smile 2: That time I laughed so hard I cried.</p>
+        </div>
+        <div class="media-container" data-description="Smile 3: Quick selfie right after waking up." data-media-type="image">
+            <img src="smile23.jpg" alt="Photo of quick selfie" />
+            <p class="media-description">Smile 3: Quick selfie right after waking up.</p>
+        </div>
+        <div class="media-container" data-description="Smile 4: Trying out a silly filter." data-media-type="image">
+            <img src="smile24.jpg" alt="Photo with silly filter" />
+            <p class="media-description">Smile 4: Trying out a silly filter.</p>
+        </div>
+        <div class="media-container" data-description="Smile 5: A successful new recipe attempt!" data-media-type="image">
+            <img src="smile25.jpg" alt="Photo of successful recipe" />
+            <p class="media-description">Smile 5: A successful new recipe attempt!</p>
+        </div>
+        <div class="media-container" data-description="Smile 6: Dancing alone in my room." data-media-type="image">
+            <img src="smile26.jpg" alt="Photo of dancing in room" />
+            <p class="media-description">Smile 6: Dancing alone in my room.</p>
+        </div>
+        <div class="media-container" data-description="Smile 7: Showing off my new outfit." data-media-type="image">
+            <img src="smile27.jpg" alt="Photo of new outfit" />
+            <p class="media-description">Smile 7: Showing off my new outfit.</p>
+        </div>
+        <div class="media-container" data-description="Smile 8: Just chilling with a book." data-media-type="image">
+            <img src="smile28.jpg" alt="Photo chilling with book" />
+            <p class="media-description">Smile 8: Just chilling with a book.</p>
+        </div>
+        <div class="media-container" data-description="Smile 9: Morning coffee routine." data-media-type="image">
+            <img src="smile29.jpg" alt="Photo of morning coffee" />
+            <p class="media-description">Smile 9: Morning coffee routine.</p>
+        </div>
+        <div class="media-container" data-description="Smile 10: Singing badly but proudly." data-media-type="image">
+            <img src="smile30.jpg" alt="Photo of singing proudly" />
+            <p class="media-description">Smile 10: Singing badly but proudly.</p>
+        </div>
+        <div class="media-container" data-description="Smile 1: Just a spontaneous happy moment." data-media-type="image">
+            <img src="smile31.jpg" alt="Photo of happy moment" />
+            <p class="media-description">Smile 1: Just a spontaneous happy moment.</p>
+        </div>
+        <div class="media-container" data-description="Smile 2: That time I laughed so hard I cried." data-media-type="image">
+            <img src="smile32.jpg" alt="Photo of laughing hard" />
+            <p class="media-description">Smile 2: That time I laughed so hard I cried.</p>
+        </div>
+        <div class="media-container" data-description="Smile 3: Quick selfie right after waking up." data-media-type="image">
+            <img src="smile33.jpg" alt="Photo of quick selfie" />
+            <p class="media-description">Smile 3: Quick selfie right after waking up.</p>
+        </div>
+        <div class="media-container" data-description="Smile 4: Trying out a silly filter." data-media-type="image">
+            <img src="smile34.jpg" alt="Photo with silly filter" />
+            <p class="media-description">Smile 4: Trying out a silly filter.</p>
+        </div>
+        <div class="media-container" data-description="Smile 5: A successful new recipe attempt!" data-media-type="image">
+            <img src="smile35.jpg" alt="Photo of successful recipe" />
+            <p class="media-description">Smile 5: A successful new recipe attempt!</p>
+        </div>
+        <div class="media-container" data-description="Smile 7: Showing off my new outfit." data-media-type="image">
+            <img src="smile36.jpg" alt="Photo of new outfit" />
+            <p class="media-description">Smile 6: Dancing alone in my room.</p>
+        </div>
+        <div class="media-container" data-description="Smile 7: Showing off my new outfit." data-media-type="image">
+            <img src="smile37.jpg" alt="Photo of new outfit" />
+            <p class="media-description">Smile 7: Showing off my new outfit.</p>
+        </div>
+        <div class="media-container" data-description="Smile 8: Just chilling with a book." data-media-type="image">
+            <img src="smile38.jpg" alt="Photo chilling with book" />
+            <p class="media-description">Smile 8: Just chilling with a book.</p>
+        </div>
+        <div class="media-container" data-description="Smile 9: Morning coffee routine." data-media-type="image">
+            <img src="smile39.jpg" alt="Photo of morning coffee" />
+            <p class="media-description">Smile 9: Morning coffee routine.</p>
+        </div>
+        <div class="media-container" data-description="Smile 10: Singing badly but proudly." data-media-type="image">
+            <img src="smile40.jpg" alt="Photo of singing proudly" />
+            <p class="media-description">Smile 10: Singing badly but proudly.</p>
+        </div>
+        <div class="media-container" data-description="Smile 1: Just a spontaneous happy moment." data-media-type="image">
+            <img src="smile41.jpg" alt="Photo of happy moment" />
+            <p class="media-description">Smile 1: Just a spontaneous happy moment.</p>
+        </div>
+        <div class="media-container" data-description="Smile 2: That time I laughed so hard I cried." data-media-type="image">
+            <img src="smile42.jpg" alt="Photo of laughing hard" />
+            <p class="media-description">Smile 2: That time I laughed so hard I cried.</p>
+        </div>
+        <div class="media-container" data-description="Smile 3: Quick selfie right after waking up." data-media-type="image">
+            <img src="smile43.jpg" alt="Photo of quick selfie" />
+            <p class="media-description">Smile 3: Quick selfie right after waking up.</p>
+        </div>
+        <div class="media-container" data-description="Smile 4: Trying out a silly filter." data-media-type="image">
+            <img src="smile44.jpg" alt="Photo with silly filter" />
+            <p class="media-description">Smile 4: Trying out a silly filter.</p>
+        </div>
+        <div class="media-container" data-description="Smile 5: A successful new recipe attempt!" data-media-type="image">
+            <img src="smile45.jpg" alt="Photo of successful recipe" />
+            <p class="media-description">Smile 5: A successful new recipe attempt!</p>
+        </div>
+        <div class="media-container" data-description="Smile 7: Showing off my new outfit." data-media-type="image">
+            <img src="smile46.jpg" alt="Photo of new outfit" />
+            <p class="media-description">Smile 6: Dancing alone in my room.</p>
+        </div>
+        <div class="media-container" data-description="Smile 7: Showing off my new outfit." data-media-type="image">
+            <img src="smile47.jpg" alt="Photo of new outfit" />
+            <p class="media-description">Smile 7: Showing off my new outfit.</p>
+        </div>
+        <div class="media-container" data-description="Smile 8: Just chilling with a book." data-media-type="image">
+            <img src="smile48.jpg" alt="Photo chilling with book" />
+            <p class="media-description">Smile 8: Just chilling with a book.</p>
+        </div>
+        <div class="media-container" data-description="Smile 9: Morning coffee routine." data-media-type="image">
+            <img src="smile49.jpg" alt="Photo of morning coffee" />
+            <p class="media-description">Smile 9: Morning coffee routine.</p>
+        </div>
+        <div class="media-container" data-description="Smile 10: Singing badly but proudly." data-media-type="image">
+            <img src="smile50.jpg" alt="Photo of singing proudly" />
+            <p class="media-description">Smile 10: Singing badly but proudly.</p>
+        </div>
+        <div class="media-container" data-description="Smile 7: Showing off my new outfit." data-media-type="image">
+            <img src="smile51.jpg" alt="Photo of new outfit" />
+            <p class="media-description">Smile 7: Showing off my new outfit.</p>
+        </div>
+        <div class="media-container" data-description="Smile 8: Just chilling with a book." data-media-type="image">
+            <img src="smile52.jpg" alt="Photo chilling with book" />
+            <p class="media-description">Smile 8: Just chilling with a book.</p>
+        </div>
+        <div class="media-container" data-description="Smile 9: Morning coffee routine." data-media-type="image">
+            <img src="smile53.jpg" alt="Photo of morning coffee" />
+            <p class="media-description">Smile 9: Morning coffee routine.</p>
+        </div>
+    </div>
+    </section>
+
+   <section id="withbodmun">
+    <h2>With Ysagani 💕</h2>
+    <p>Just us being goofy, real, and alive. No filter, no act — just us.</p>
+    <p id="daysTogether"></p>
+
+    <div class="media-gallery">
+        <div class="media-container" data-description="Wysagani 54: Our favorite goofball moments together." data-media-type="video">
+            <video controls><source src="Wysagani1.mp4" type="video/mp4" /></video>
+            <p class="media-description">Wysagani 54: Our favorite goofball moments together.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 55: A quick happy memory from last week." data-media-type="video">
+            <video controls><source src="Wysagani2.mp4" type="video/mp4" /></video>
+            <p class="media-description">Wysagani 55: A quick happy memory from last week.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 56: Just holding hands and walking in the park." data-media-type="video">
+            <video controls><source src="Wysagani3.mp4" type="video/mp4" /></video>
+            <p class="media-description">Wysagani 56: Just holding hands and walking in the park.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 57: That one time we tried cooking and it was a total disaster." data-media-type="image">
+            <img src="Wysagani4.jpg" alt="Photo of cooking disaster" />
+            <p class="media-description">Wysagani 57: That one time we tried cooking and it was a total disaster.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 58: Hiking to the waterfall—totally worth the view and the company." data-media-type="image">
+            <img src="Wysagani5.jpg" alt="Photo from waterfall hike" />
+            <p class="media-description">Wysagani 58: Hiking to the waterfall—totally worth the view and the company.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 59: Watching movies on the couch, the best kind of quiet night." data-media-type="image">
+            <img src="Wysagani6.jpg" alt="Photo of movie night" />
+            <p class="media-description">Wysagani 59: Watching movies on the couch, the best kind of quiet night.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 60: Our anniversary dinner, best day ever." data-media-type="video">
+            <video controls><source src="Wysagani7.mp4" type="video/mp4" /></video>
+            <p class="media-description">Wysagani 60: Our anniversary dinner, best day ever.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 61: Caught her singing in the car at the top of her lungs." data-media-type="image">
+            <img src="Wysagani8.jpg" alt="Photo in car" />
+            <p class="media-description">Wysagani 61: Caught her singing in the car at the top of her lungs.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 62: Random dance party in the living room." data-media-type="image">
+            <img src="Wysagani9.jpg" alt="Photo of dance party" />
+            <p class="media-description">Wysagani 62: Random dance party in the living room.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 63: Holding hands while waiting for the train. Simple moments matter most." data-media-type="image">
+            <img src="Wysagani10.jpg" alt="Photo on the train" />
+            <p class="media-description">Wysagani 63: Holding hands while waiting for the train. Simple moments matter most.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 54: Our favorite goofball moments together." data-media-type="image">
+            <img src="Wysagani11.jpg" alt="Photo of favorite goofy moments" />
+            <p class="media-description">Wysagani 54: Our favorite goofball moments together.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 55: A quick happy memory from last week." data-media-type="video">
+            <video controls><source src="Wysagani12.mp4" type="video/mp4" /></video>
+            <p class="media-description">Wysagani 55: A quick happy memory from last week.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 56: Just holding hands and walking in the park." data-media-type="image">
+            <img src="Wysagani13.jpg" alt="Photo holding hands in park" />
+            <p class="media-description">Wysagani 56: Just holding hands and walking in the park.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 57: That one time we tried cooking and it was a total disaster." data-media-type="image">
+            <img src="Wysagani14.jpg" alt="Photo of cooking disaster" />
+            <p class="media-description">Wysagani 57: That one time we tried cooking and it was a total disaster.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 58: Hiking to the waterfall—totally worth the view and the company." data-media-type="video">
+            <video controls><source src="Wysagani15.mp4" type="video/mp4" /></video>
+            <p class="media-description">Wysagani 58: Hiking to the waterfall—totally worth the view and the company.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 59: Watching movies on the couch, the best kind of quiet night." data-media-type="video">
+            <video controls><source src="Wysagani16.mp4" type="video/mp4" /></video>
+            <p class="media-description">Wysagani 59: Watching movies on the couch, the best kind of quiet night.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 60: Our anniversary dinner, best day ever." data-media-type="video">
+            <video controls><source src="Wysagani17.mp4" type="video/mp4" /></video>
+            <p class="media-description">Wysagani 60: Our anniversary dinner, best day ever.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 61: Caught her singing in the car at the top of her lungs." data-media-type="video">
+            <video controls><source src="Wysagani18.mp4" type="video/mp4" /></video>
+            <p class="media-description">Wysagani 61: Caught her singing in the car at the top of her lungs.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 62: Random dance party in the living room." data-media-type="video">
+            <video controls><source src="Wysagani19.mp4" type="video/mp4" /></video>
+            <p class="media-description">Wysagani 62: Random dance party in the living room.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 63: Holding hands while waiting for the train. Simple moments matter most." data-media-type="image">
+            <img src="Wysagani20.jpg" alt="Photo on the train" />
+            <p class="media-description">Wysagani 63: Holding hands while waiting for the train. Simple moments matter most.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 54: Our favorite goofball moments together." data-media-type="image">
+            <img src="Wysagani21.jpg" alt="Photo of goofy moments" />
+            <p class="media-description">Wysagani 54: Our favorite goofball moments together.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 55: A quick happy memory from last week." data-media-type="image">
+            <img src="Wysagani22.jpg" alt="Photo of happy memory" />
+            <p class="media-description">Wysagani 55: A quick happy memory from last week.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 56: Just holding hands and walking in the park." data-media-type="image">
+            <img src="Wysagani23.jpg" alt="Photo holding hands in park" />
+            <p class="media-description">Wysagani 56: Just holding hands and walking in the park.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 57: That one time we tried cooking and it was a total disaster." data-media-type="image">
+            <img src="Wysagani24.jpg" alt="Photo of cooking disaster" />
+            <p class="media-description">Wysagani 57: That one time we tried cooking and it was a total disaster.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 58: Hiking to the waterfall—totally worth the view and the company." data-media-type="image">
+            <img src="Wysagani25.jpg" alt="Photo of hike" />
+            <p class="media-description">Wysagani 58: Hiking to the waterfall—totally worth the view and the company.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 59: Watching movies on the couch, the best kind of quiet night." data-media-type="image">
+            <img src="Wysagani26.jpg" alt="Photo of movie night" />
+            <p class="media-description">Wysagani 59: Watching movies on the couch, the best kind of quiet night.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 60: Our anniversary dinner, best day ever." data-media-type="image">
+            <img src="Wysagani27.jpg" alt="Photo of anniversary dinner" />
+            <p class="media-description">Wysagani 60: Our anniversary dinner, best day ever.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 61: Caught her singing in the car at the top of her lungs." data-media-type="image">
+            <img src="Wysagani28.jpg" alt="Photo in car" />
+            <p class="media-description">Wysagani 61: Caught her singing in the car at the top of her lungs.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 62: Random dance party in the living room." data-media-type="image">
+            <img src="Wysagani29.jpg" alt="Photo of dance party" />
+            <p class="media-description">Wysagani 62: Random dance party in the living room.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 63: Holding hands while waiting for the train. Simple moments matter most." data-media-type="image">
+            <img src="Wysagani30.jpg" alt="Photo on the train" />
+            <p class="media-description">Wysagani 63: Holding hands while waiting for the train. Simple moments matter most.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 54: Our favorite goofball moments together." data-media-type="image">
+            <img src="Wysagani31.jpg" alt="Photo of goofy moments" />
+            <p class="media-description">Wysagani 54: Our favorite goofball moments together.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 55: A quick happy memory from last week." data-media-type="image">
+            <img src="Wysagani32.jpg" alt="Photo of happy memory" />
+            <p class="media-description">Wysagani 55: A quick happy memory from last week.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 56: Just holding hands and walking in the park." data-media-type="image">
+            <img src="Wysagani33.jpg" alt="Photo holding hands in park" />
+            <p class="media-description">Wysagani 56: Just holding hands and walking in the park.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 57: That one time we tried cooking and it was a total disaster." data-media-type="image">
+            <img src="Wysagani34.jpg" alt="Photo of cooking disaster" />
+            <p class="media-description">Wysagani 57: That one time we tried cooking and it was a total disaster.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 58: Hiking to the waterfall—totally worth the view and the company." data-media-type="image">
+            <img src="Wysagani35.jpg" alt="Photo of hike" />
+            <p class="media-description">Wysagani 58: Hiking to the waterfall—totally worth the view and the company.</p>
+        </div>
+        <div class="media-container" data-description="Wysagani 59: Watching movies on the couch, the best kind of quiet night." data-media-type="image">
+            <img src="Wysagani36.jpg" alt="Photo of movie night" />
+            <p class="media-description">Wysagani 59: Watching movies on the couch, the best kind of quiet night.</p>
+        </div>
+        </div>
+    </section>
+
+
+
+    <section id="random">
+      <h2>Random Thoughts ✍️</h2>
+      <p>I don’t even know how she does it, but even when I’m quiet, she makes me feel heard.</p>
+
+      <textarea id="diaryText" placeholder="Write a new diary entry..."></textarea><br>
+      <button class="saveEntry" onclick="saveEntry()">Save Entry 💌</button>
+
+      <div class="entries" id="entriesList"></div>
+    </section>
+  </div>
+  
+  <div id="mediaModal" class="modal">
+    <span class="close" id="closeModal">&times;</span>
+    <div class="modal-content">
+        <div id="expandedMedia"></div>
+        <div id="caption"></div>
+    </div>
+  </div>
+
+  <footer>Made with ❤️ by Ysagani for Angelica</footer>
+
+  <button id="musicBtn" onclick="toggleMusic()">🎵</button>
+  <button id="darkModeBtn" onclick="toggleDarkMode()">🌙</button>
+
+  <script>
+    const sections = document.querySelectorAll("section");
+    const musics = {
+      smiles: document.getElementById("musicSmiles"),
+      withbodmun: document.getElementById("musicWithBodmun"),
+      random: document.getElementById("musicRandom")
+    };
+    const btn = document.getElementById("musicBtn");
+    let currentMusic = musics.smiles;
+    let playing = false;
+
+    function showSection(id) {
+      sections.forEach(sec => sec.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (playing) {
+        currentMusic.pause();
+        currentMusic = musics[id];
+        currentMusic.currentTime = 0;
+        currentMusic.play();
+      } else {
+        currentMusic = musics[id];
+      }
+    }
+
+    function toggleMusic() {
+      if (playing) {
+        currentMusic.pause();
+        btn.textContent = "🎵";
+      } else {
+        currentMusic.play();
+        btn.textContent = "⏸️";
+      }
+      playing = !playing;
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    // Floating hearts animation
+    function startHeartAnimation() {
+      setInterval(() => {
+        const heart = document.createElement("div");
+        heart.classList.add("heart");
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.animationDuration = Math.random() * 2 + 3 + "s";
+        heart.textContent = "💖";
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 5000);
+      }, 700);
+    }
+    // Start the animation after a short delay to avoid immediate clutter on refresh
+    setTimeout(startHeartAnimation, 1500); 
+
+    // Days together counter
+    const startDate = new Date("2024-07-29"); // *** CUSTOMIZE THIS DATE! *** Format is YYYY-MM-DD
+    const today = new Date();
+    const diffTime = today.getTime() - startDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    document.getElementById("daysTogether").textContent = `Days since we met: ${diffDays} incredible days 💕`;
+
+    // Diary entries (using localStorage for simple persistence)
+    function saveEntry() {
+      const text = document.getElementById("diaryText").value.trim();
+      if (!text) return;
+      const entries = JSON.parse(localStorage.getItem("diaryEntries") || "[]");
+      entries.push({ text, date: new Date().toLocaleString() });
+      localStorage.setItem("diaryEntries", JSON.stringify(entries));
+      document.getElementById("diaryText").value = "";
+      loadEntries();
+    }
+
+    function loadEntries() {
+      const list = document.getElementById("entriesList");
+      list.innerHTML = "";
+      const entries = JSON.parse(localStorage.getItem("diaryEntries") || "[]");
+      entries.reverse().forEach(e => {
+        const div = document.createElement("div");
+        div.classList.add("entry");
+        div.innerHTML = `<small>${e.date}</small><p>${e.text}</p>`;
+        list.appendChild(div);
+      });
+    }
+    loadEntries();
+
+    // Hidden "I love you" Easter egg
+    let heartClicks = 0;
+    document.getElementById("musicBtn").addEventListener("click", () => {
+      heartClicks++;
+      if (heartClicks === 5) {
+        console.log("💖 I love you 💖");
+        heartClicks = 0;
+      }
+    });
+    
+    // --- Click-to-Expand Logic (UPDATED FOR IMAGE/VIDEO) ---
+    const modal = document.getElementById("mediaModal");
+    const expandedMediaContainer = document.getElementById("expandedMedia");
+    const captionText = document.getElementById("caption");
+    // NOTE: This needs to run AFTER the media is loaded, or inside a function called after section content changes.
+    // For initial load, we call it here:
+    const mediaContainers = document.querySelectorAll(".media-container"); 
+
+    mediaContainers.forEach(container => {
+        container.addEventListener('click', function() {
+            const mediaType = this.getAttribute('data-media-type');
+            const description = this.getAttribute('data-description');
+            
+            expandedMediaContainer.innerHTML = '';
+            let expandedMedia;
+
+            if (mediaType === 'video') {
+                // Handle Video: Clone the video element, add controls, and set to autoplay
+                const originalVideo = this.querySelector('video');
+                expandedMedia = originalVideo.cloneNode(true);
+                expandedMedia.setAttribute('controls', 'true');
+                expandedMedia.autoplay = true; 
+                
+            } else if (mediaType === 'image') {
+                // Handle Image: Create a new image element
+                const originalImage = this.querySelector('img');
+                expandedMedia = document.createElement('img');
+                expandedMedia.src = originalImage.src;
+                expandedMedia.alt = description;
+            }
+            
+            if (expandedMedia) {
+                expandedMediaContainer.appendChild(expandedMedia);
+                captionText.innerHTML = description;
+                modal.style.display = "flex"; 
+            }
+        });
+    });
+
+    const closeBtn = document.getElementById("closeModal");
+
+    // Function to close modal and pause video if active
+    function closeModalAndPause() {
+        // Check if the current expanded media is a video before trying to pause
+        const mediaElement = expandedMediaContainer.firstElementChild;
+        if (mediaElement && mediaElement.tagName === 'VIDEO') {
+            mediaElement.pause();
+        }
+        modal.style.display = "none";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    closeBtn.onclick = closeModalAndPause;
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModalAndPause();
+        }
+    }
+  </script>
+</body>
+</html>
